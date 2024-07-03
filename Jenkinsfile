@@ -1,4 +1,5 @@
 
+def app
 pipeline {
     agent any
     environment {
@@ -8,23 +9,20 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    docker.build("carlosdelgadillo/suma_windows")
+                    app = docker.build("carlosdelgadillo/suma_windows")
                 }
             }
         }
-        stage('Scan') {
+        stage('Push image') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker-credentials') {
-                        bat """
-                        docker run -d -t ^
-                            -w "${env.WORKSPACE_DIR}" ^
-                            -v "${env.WORKSPACE_DIR}:${env.WORKSPACE_DIR}" ^
-                            mi-app:latest
-                        """
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
+                    app.push("${env.BUILD_NUMBER}")
                     }
                 }
             }
-        }
+        }   
     }
 }
+
+
